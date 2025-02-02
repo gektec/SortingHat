@@ -29,21 +29,31 @@ class VideoProcessing:
                 left_eye = face_landmarks.landmark[left_eye_idx]
                 right_eye = face_landmarks.landmark[right_eye_idx]
 
-                hat_width = int(abs(right_eye.x - left_eye.x) * w * 3)
+                hat_width = int(abs(right_eye.x - left_eye.x) * w * 10)
                 hat_height = int(hat_width * self.hat_image.shape[0] / self.hat_image.shape[1])
                 hat_resized = cv2.resize(self.hat_image, (hat_width, hat_height))
-                x = int(left_eye.x * w - hat_width / 4)
-                y = int(left_eye.y * h - hat_height / 1.2)
 
-                for i in range(hat_height):
-                    for j in range(hat_width):
-                        if hat_resized[i, j][3] != 0:
-                            offset_y = y + i
-                            offset_x = x + j
-                            if offset_x < w and offset_y < h:
-                                image[offset_y, offset_x] = hat_resized[i, j][:3]
+                x = int(left_eye.x * w - hat_width / 2.4)
+                y = int(left_eye.y * h - hat_height / 1)
+
+                y1 = max(0, y)
+                y2 = min(h, y + hat_height)
+                x1 = max(0, x)
+                x2 = min(w, x + hat_width)
+
+                if y2 > y1 and x2 > x1:
+                    hat_part = hat_resized[y1-y:y2-y, x1-x:x2-x]
+                    alpha_channel = hat_part[:, :, 3] / 255.0
+                    inverse_alpha = 1.0 - alpha_channel
+
+                    for c in range(0, 3):
+                        image[y1:y2, x1:x2, c] = (image[y1:y2, x1:x2, c] * inverse_alpha + 
+                                                  hat_part[:, :, c] * alpha_channel)
 
             self.frame = image
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.running = False
 
     def get_frame(self):
         return self.frame
@@ -51,3 +61,4 @@ class VideoProcessing:
     def release(self):
         self.running = False
         self.cap.release()
+        self.face_mesh.close()  # 释放mediapipe资源
