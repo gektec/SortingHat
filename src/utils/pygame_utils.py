@@ -31,3 +31,34 @@ class PyGameDisplay:
             # 将视频绘制到窗口的上半部分并更新显示
             self.screen.blit(frame_surface, (x_offset, 0))
             pygame.display.flip()
+
+class InputBox:
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color_inactive = pygame.Color('lightskyblue3')
+        self.color_active = pygame.Color('dodgerblue2')
+        self.color = self.color_inactive
+        self.text = text
+        self.font = pygame.font.Font(None, 32)
+        self.active = False
+        self.done = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.active = self.rect.collidepoint(event.pos)
+            self.color = self.color_active if self.active else self.color_inactive
+        
+        if event.type == pygame.KEYDOWN and self.active:
+            if event.key == pygame.K_RETURN:
+                self.done = True
+            elif event.key == pygame.K_BACKSPACE:
+                self.text = self.text[:-1]
+            elif event.unicode.isprintable():
+                self.text += event.unicode
+
+    def draw(self, screen):
+        txt_surface = self.font.render(self.text, True, (255, 255, 255))
+        width = max(self.rect.w, txt_surface.get_width() + 10)
+        self.rect.w = width
+        screen.blit(txt_surface, (self.rect.x+5, self.rect.y+5))
+        pygame.draw.rect(screen, self.color, self.rect, 2)
