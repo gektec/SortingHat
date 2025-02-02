@@ -33,7 +33,7 @@ def main():
                 tts_synthesis.synthesize_speech(response_text)
 
     # 启动语音输入线程
-    thread_manager.start_thread(speech_input_thread)
+    # thread_manager.start_thread(speech_input_thread)
 
     # 主循环
     running = True
