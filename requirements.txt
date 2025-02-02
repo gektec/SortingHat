@@ -1,0 +1,7 @@
+pygame
+speechrecognition
+openai
+pyttsx3
+mediapipe
+opencv-python
+numpy
