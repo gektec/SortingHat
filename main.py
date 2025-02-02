@@ -28,12 +28,12 @@ def main():
             speech_text = speech_input.get_speech()
             if speech_text:
                 # 调用OpenAI API处理语音文本
-                response_text = openai_api.process_text(speech_text)
+                response = openai_api.process_text(speech_text)
                 # 合成语音
-                tts_synthesis.synthesize_speech(response_text)
+                tts_synthesis.synthesize_speech(response.hat_response)
 
     # 启动语音输入线程
-    # thread_manager.start_thread(speech_input_thread)
+    thread_manager.start_thread(speech_input_thread)
 
     # 主循环
     running = True
