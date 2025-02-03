@@ -36,7 +36,10 @@ def main():
     def speech_input_thread():
         nonlocal exit_requested, exit_lock 
         while True:
+            
+            # 切换为语音输入
             #user_input = speech_input.get_speech()
+            
             user_input = input("Enter your text: ")
             if user_input:
                 response = openai_api.process_text(user_input)
