@@ -1,4 +1,5 @@
 import json
+import openai
 from openai import OpenAI
 from dataclasses import dataclass
 
@@ -46,12 +47,23 @@ Example JSON Output:
         print("\n\nINPUT:")
         print(self.messages)
 
-        response = self.client.chat.completions.create(
-            model=self.config["model"],
-            messages=self.messages,  # Use accumulated messages including the new one
-            response_format={"type": "json_object"},
-            stream=False
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.config["model"],
+                messages=self.messages,  # Use accumulated messages including the new one
+                response_format={"type": "json_object"},
+                stream=False
+            )
+        except (openai.APIConnectionError) as e:
+            print(f"API Error: {e}")
+            default_result = SortingResult(
+                hat_response="The Sorting Hat is drunk and offline. Please come back later.",
+                gryffindor=0,
+                hufflepuff=0,
+                ravenclaw=0,
+                slytherin=0
+            )
+            return default_result
         
         print("\n\nRESPONSE:")
         print(response)
@@ -59,7 +71,6 @@ Example JSON Output:
         try:
             reply = json.loads(response.choices[0].message.content)
         except json.JSONDecodeError:
-            # Return an empty SortingResult in case of JSONDecodeError
             return SortingResult(
                 hat_response="Sorry, an old hat like me can't understand that.",
                 gryffindor=0,
@@ -68,7 +79,6 @@ Example JSON Output:
                 slytherin=0
             )
         
-        # Update messages to include the system's (Sortable Hat) response for the current input
         self.messages.append({"role": "system", "content": reply['hat_response']})
         
         result = SortingResult(

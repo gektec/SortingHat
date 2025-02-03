@@ -71,9 +71,29 @@ Example JSON Output:
         
         except ValidationError as e:
             print(f"Validation Error: {e}")
-            # Handle the error, e.g., by returning a default SortingResult or logging the error
             default_result = SortingResult(
                 hat_response="Sorry, an old hat like me can't understand that.",
+                gryffindor=0,
+                hufflepuff=0,
+                ravenclaw=0,
+                slytherin=0
+            )
+            return default_result
+        except (openai.APIConnectionError) as e:
+            print(f"API Error: {e}")
+            default_result = SortingResult(
+                hat_response="The Sorting Hat is drunk and offline. Please come back later.",
+                gryffindor=0,
+                hufflepuff=0,
+                ravenclaw=0,
+                slytherin=0
+            )
+            return default_result
+        
+        except Exception as e:
+            print(f"Unexpected Error: {e}")
+            default_result = SortingResult(
+                hat_response="An unexpected error occurred. The Sorting Hat is confused.",
                 gryffindor=0,
                 hufflepuff=0,
                 ravenclaw=0,
