@@ -1,10 +1,9 @@
 import openai
 from openai import OpenAI
 import json
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 # Might not supported by DeepSeek
-
 
 class SortingResult(BaseModel):
     hat_response: str
@@ -45,24 +44,36 @@ Example JSON Output:
     def process_text(self, text: str) -> SortingResult:
         self.history.append({"role": "user", "content": text})
         
+        try:
+            completion = self.client.beta.chat.completions.parse(
+                model=self.config["model"],
+                messages=self.history,
+                response_format=SortingResult,
+            )
+            
+            print("\n\nRESPONSE:")
+            print(completion)
+            
+            result = completion.choices[0].message.parsed
+            
+            print("\n\nSORTING RESULT:")
+            print(result)
+            
+            self.history.append({
+                "role": "assistant", 
+                "content": result.model_dump_json()
+            })
+            
+            return result
         
-        completion = self.client.beta.chat.completions.parse(
-            model=self.config["model"],
-            messages=self.history,
-            response_format=SortingResult,
-        )
-        
-        print("\n\nRESPONSE:")
-        print(completion)
-        
-        result = completion.choices[0].message.parsed
-        
-        print("\n\nSORTING RESULT:")
-        print(result)
-        
-        self.history.append({
-            "role": "assistant", 
-            "content": result.model_dump_json()
-        })
-        
-        return result
+        except ValidationError as e:
+            print(f"Validation Error: {e}")
+            # Handle the error, e.g., by returning a default SortingResult or logging the error
+            default_result = SortingResult(
+                hat_response="Sorry, an old hat like me can't understand that.",
+                gryffindor=0,
+                hufflepuff=0,
+                ravenclaw=0,
+                slytherin=0
+            )
+            return default_result
