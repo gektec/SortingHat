@@ -2,7 +2,10 @@ import pygame
 import sys
 import threading
 from src.audio_processing.speech_input import SpeechInput
+
+#from src.audio_processing.deepseek_api import OpenAIAPI
 from src.audio_processing.openai_api import OpenAIAPI
+
 from src.audio_processing.tts_synthesis import TTSSynthesis
 from src.video_processing import VideoProcessing
 from src.utils.threading_utils import ThreadManager
@@ -31,7 +34,12 @@ def main():
     def speech_input_thread():
         nonlocal exit_requested, exit_lock 
         while True:
+            
+            # 切换为语音输入
+            #user_input = speech_input.get_speech()
+            
             user_input = input("\nEnter your text: ")  # User input through console
+            
             if user_input:
                 response = openai_api.process_text(user_input)
                 
