@@ -17,6 +17,7 @@ def main():
 
     exit_requested = False
     exit_lock = threading.Lock()
+    cumulative_scores = {"Gryffindor": 0, "Hufflepuff": 0, "Ravenclaw": 0, "Slytherin": 0}
 
     speech_input = SpeechInput()
     openai_api = OpenAIAPI()
@@ -45,18 +46,20 @@ def main():
                 
                 tts_synthesis.synthesize_speech(response.hat_response)  # Use TTS for the response
                 
-                print(f"\n\nCurrent Scores: Gryffindor={response.gryffindor}, "
-                      f"Hufflepuff={response.hufflepuff}, "
-                      f"Ravenclaw={response.ravenclaw}, "
-                      f"Slytherin={response.slytherin}")
+                cumulative_scores["Gryffindor"] += response.gryffindor
+                cumulative_scores["Hufflepuff"] += response.hufflepuff
+                cumulative_scores["Ravenclaw"] += response.ravenclaw
+                cumulative_scores["Slytherin"] += response.slytherin
+                
+                print("\nCurrent Scores:")
+                for house, score in cumulative_scores.items():
+                    print(f"{house}: {score}")
 
                 # Exiting conditions based on score
-                if any(score > 15 for score in [response.gryffindor, response.hufflepuff, response.ravenclaw, response.slytherin]):
-                    
-                    print(f"House Assigned: Gryffindor={response.gryffindor}, "
-                          f"Hufflepuff={response.hufflepuff}, "
-                          f"Ravenclaw={response.ravenclaw}, "
-                          f"Slytherin={response.slytherin}")
+                if any(score > 15 for score in cumulative_scores.values()):
+                    print("\nHouse with highest score:")
+                    winner = max(cumulative_scores, key=cumulative_scores.get)
+                    print(f"{winner} with a score of {cumulative_scores[winner]}")
 
                     with exit_lock:
                         exit_requested = True
