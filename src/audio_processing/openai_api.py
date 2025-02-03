@@ -44,6 +44,9 @@ Example JSON Output:
     def process_text(self, text: str) -> SortingResult:
         self.history.append({"role": "user", "content": text})
         
+        print("\n\nINPUT:")
+        print(self.history)
+        
         try:
             completion = self.client.beta.chat.completions.parse(
                 model=self.config["model"],
