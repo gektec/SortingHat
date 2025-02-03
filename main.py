@@ -74,8 +74,10 @@ def main():
                 
                 # 合成语音
                 tts_synthesis.synthesize_speech(response.hat_response)
+                tts_synthesis.synthesize_speech(response.hat_response)
 
     # 启动语音输入线程
+    thread_manager.start_thread(speech_input_thread)
     thread_manager.start_thread(speech_input_thread)
 
     # 主循环
