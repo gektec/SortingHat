@@ -1,61 +1,93 @@
-import cv2
-import mediapipe as mp
-import numpy as np
+import pygame
+import sys
+import threading
+from src.audio_processing.speech_input import SpeechInput
 
-# 初始化MediaPipe Face Mesh模型
-mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1, min_detection_confidence=0.5)
+#from src.audio_processing.deepseek_api import OpenAIAPI
+from src.audio_processing.openai_api import OpenAIAPI
 
-
-# 读取帽子图像
-hat_image = cv2.imread('assets/hat.png', -1)  # 带有alpha通道
-
-cap = cv2.VideoCapture(0)  # 开启摄像头
-
+from src.audio_processing.tts_synthesis import TTSSynthesis
+from src.video_processing import VideoProcessing
+from src.threading_utils import ThreadManager
+from src.pygame_utils import PyGameDisplay
 
 
-while cap.isOpened():
-    success, image = cap.read()
-    if not success:
-        break
+def main():
+    pygame.init()
 
-    # 转换图像颜色空间从BGR到RGB，并进行处理
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = face_mesh.process(image_rgb)
+    exit_requested = False
+    exit_lock = threading.Lock()
+    cumulative_scores = {"Gryffindor": 0, "Hufflepuff": 0, "Ravenclaw": 0, "Slytherin": 0}
 
-    if results.multi_face_landmarks:
-        face_landmarks = results.multi_face_landmarks[0]
-        h, w, _ = image.shape
+    speech_input = SpeechInput()
+    openai_api = OpenAIAPI()
+    tts_synthesis = TTSSynthesis()
+    video_processing = VideoProcessing()
+    thread_manager = ThreadManager()
+    pygame_display = PyGameDisplay()
 
-        # 示意：获取眼睛和眉毛的坐标来定位帽子
-        left_eye_idx = 133  # 眼睛一个特定点的索引
-        right_eye_idx = 362
-        left_eye = face_landmarks.landmark[left_eye_idx]
-        right_eye = face_landmarks.landmark[right_eye_idx]
+    initial_prompt = "Welcome to Hogwarts. Let me piken in thine soule..."
+    print(initial_prompt)
+    tts_synthesis.synthesize_speech(initial_prompt)  # Using TTS to read the prompt aloud
 
-        # 计算帽子的位置和大小
-        # 这里需要根据帽子和面部尺寸进行适当的缩放和转换
+    thread_manager.start_thread(video_processing.process_video)
 
-        # 举例添加帽子（这里应进一步调整）
-        hat_width = int(abs(right_eye.x - left_eye.x) * w * 3)
-        hat_height = int(hat_width * hat_image.shape[0] / hat_image.shape[1])
-        hat_resized = cv2.resize(hat_image, (hat_width, hat_height))
-        x = int(left_eye.x * w - hat_width / 4)
-        y = int(left_eye.y * h - hat_height / 1.2)
+    def speech_input_thread():
+        nonlocal exit_requested, exit_lock 
+        while True:
+            
+            # 切换为语音输入
+            #user_input = speech_input.get_speech()
+            
+            user_input = input("\nEnter your text: ")  # User input through console
+            
+            if user_input:
+                response = openai_api.process_text(user_input)
+                
+                tts_synthesis.synthesize_speech(response.hat_response)  # Use TTS for the response
+                
+                cumulative_scores["Gryffindor"] += response.gryffindor
+                cumulative_scores["Hufflepuff"] += response.hufflepuff
+                cumulative_scores["Ravenclaw"] += response.ravenclaw
+                cumulative_scores["Slytherin"] += response.slytherin
+                
+                print("\nCurrent Scores:")
+                for house, score in cumulative_scores.items():
+                    print(f"{house}: {score}")
 
-        # 处理帽子透明度
-        for i in range(hat_height):
-            for j in range(hat_width):
-                if hat_resized[i, j][3] != 0:  # alpha 通道不为 0
-                    offset_y = y + i
-                    offset_x = x + j
-                    if offset_x < w and offset_y < h:
-                        image[offset_y, offset_x] = hat_resized[i, j][:3]
+                # Exiting conditions based on score
+                if any(score > 15 for score in cumulative_scores.values()):
+                    print("\nHouse with highest score:")
+                    winner = max(cumulative_scores, key=cumulative_scores.get)
+                    
+                    exit_prompt = "In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
+                    tts_synthesis.synthesize_speech(exit_prompt)
+                    print(exit_prompt)
 
-    # 显示修改后的图像
-    cv2.imshow('MediaPipe Face Mesh', image)
-    if cv2.waitKey(5) & 0xFF == 27:
-        break
+                    with exit_lock:
+                        exit_requested = True
+                    return 
 
+    thread_manager.start_thread(speech_input_thread)
 
-cap.release()
+    # Main Pygame event loop
+    running = True
+    while running:
+        with exit_lock:
+            if exit_requested:
+                running = False
+                break 
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        pygame_display.update_display(video_processing.get_frame())
+
+    thread_manager.stop_all_threads()
+    video_processing.release()
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
