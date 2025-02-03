@@ -61,7 +61,7 @@ Example JSON Output:
         except json.JSONDecodeError:
             # Return an empty SortingResult in case of JSONDecodeError
             return SortingResult(
-                hat_response="",
+                hat_response="Sorry, an old hat like me can't understand that.",
                 gryffindor=0,
                 hufflepuff=0,
                 ravenclaw=0,
