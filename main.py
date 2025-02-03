@@ -26,7 +26,7 @@ def main():
     thread_manager = ThreadManager()
     pygame_display = PyGameDisplay()
 
-    initial_prompt = "Welcome to Hoggewarts. Lete me piken in thine soule..."
+    initial_prompt = "Welcome to Hogwarts. Let me piken in thine soule..."
     print(initial_prompt)
     tts_synthesis.synthesize_speech(initial_prompt)  # Using TTS to read the prompt aloud
 
@@ -59,10 +59,10 @@ def main():
                 if any(score > 15 for score in cumulative_scores.values()):
                     print("\nHouse with highest score:")
                     winner = max(cumulative_scores, key=cumulative_scores.get)
-                    print(f"{winner} with a score of {cumulative_scores[winner]}")
                     
-                    exit_prompt = f"In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
+                    exit_prompt = "In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
                     tts_synthesis.synthesize_speech(exit_prompt)
+                    print(exit_prompt)
 
                     with exit_lock:
                         exit_requested = True
