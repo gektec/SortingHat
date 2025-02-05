@@ -85,13 +85,14 @@ class MainWindow(QMainWindow):
     def _update_scores(self, response):
         for house in self.cumulative_scores:
             self.cumulative_scores[house] += getattr(response, house.lower())
+        print(self.cumulative_scores)
 
     def _check_exit_condition(self):
         if any(score > 15 for score in self.cumulative_scores.values()):
             winner = max(self.cumulative_scores, key=self.cumulative_scores.get)
             exit_prompt = f"In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
             self._log_and_speak(exit_prompt, is_user=False)
-            time.sleep(3)
+            time.sleep(4)
             
             with self.exit_lock:
                 self.exit_requested = True
