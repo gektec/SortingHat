@@ -6,7 +6,6 @@ import cv2
 class PyQtDisplay(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PyQt Video Display")
         self.setGeometry(100, 100, 1280, 720)
         self.label = QLabel(self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -53,27 +52,25 @@ class InputBox(QWidget):
         self.input.setPlaceholderText(text)
         self.input.setStyleSheet("""
             QLineEdit {
-                border: 2px solid lightskyblue3;
+                border: 2px solid #10263B;
                 border-radius: 5px;
                 padding: 5px;
                 font-size: 16px;
             }
             QLineEdit:focus {
-                border: 2px solid dodgerblue2;
+                border: 2px solid #405162;
             }
         """)
         
-        self.button = QPushButton("Enter", self)
+        self.button = QPushButton(" Enter ", self)
         self.button.setStyleSheet("""
             QPushButton {
-                background-color: lightskyblue3;
-                border: none;
-                border-radius: 5px;
-                padding: 5px;
+                background-color: #9FA8B1;
+                padding: 8px;
                 font-size: 16px;
             }
             QPushButton:hover {
-                background-color: dodgerblue2;
+                background-color: #707D89;
             }
         """)
         
@@ -87,8 +84,7 @@ class LogDisplay(QTextEdit):
         self.setReadOnly(True)
         self.setStyleSheet("""
             QTextEdit {
-                background-color: white;
-                border: 2px solid lightskyblue3;
+                border: 2px solid #10263B;
                 border-radius: 5px;
                 padding: 5px;
                 font-size: 16px;

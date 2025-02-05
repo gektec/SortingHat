@@ -38,12 +38,13 @@ class MainWindow(QMainWindow):
         self.tts_synthesis = TTSSynthesis()
         self.video_processing = VideoProcessing()
         self.thread_manager = ThreadManager()
-        
+
         self.thread_manager.start_thread(self.video_processing.process_video)
 
         self.initial_prompt = "Welcome to Hogwarts. Let me piken in thine soule..."
         print(self.initial_prompt)
-        self.tts_synthesis.synthesize_speech(self.initial_prompt)  # 使用TTS读出提示
+        #todo 每个tts指令均应创建线程
+        threading.Thread(target=self.tts_synthesis.synthesize_speech, args=(self.initial_prompt,)).start()
         
         self.thread_manager.start_thread(self.speech_input_thread)
 
