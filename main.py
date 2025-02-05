@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt6.QtCore import QTimer, Qt, Q_ARG, QMetaObject
 
 # 可二选一
-from src.text_processing.deepseek_api import OpenAIAPI
-#from src.text_processing.openai_api import OpenAIAPI
+# from src.text_processing.deepseek_api import OpenAIAPI
+from src.text_processing.openai_api import OpenAIAPI
 
 from src.text_processing.tts_synthesis import TTSSynthesis
 from src.video_processing import VideoProcessing
