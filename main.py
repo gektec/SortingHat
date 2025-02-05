@@ -1,13 +1,13 @@
 import sys
 import threading
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout
-from PyQt6.QtCore import QTimer, pyqtSignal, QObject
-from src.audio_processing.speech_input import SpeechInput
+from PyQt6.QtCore import QTimer, QMetaObject, Qt, Q_ARG
+from text_processing.outdated.speech_input import SpeechInput
 
 # from src.audio_processing.deepseek_api import OpenAIAPI
-from src.audio_processing.openai_api import OpenAIAPI
+from src.text_processing.openai_api import OpenAIAPI
 
-from src.audio_processing.tts_synthesis import TTSSynthesis
+from src.text_processing.tts_synthesis import TTSSynthesis
 from src.video_processing import VideoProcessing
 from src.threading_utils import ThreadManager
 from src.pyqt_utils import PyQtDisplay, InputBox, LogDisplay
@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
 
         # 根据得分判断退出条件
         if any(score > 15 for score in self.cumulative_scores.values()):
-            print("\nHouse with highest score:")
             winner = max(self.cumulative_scores, key=self.cumulative_scores.get)
             
             exit_prompt = f"In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
@@ -94,15 +93,6 @@ class MainWindow(QMainWindow):
             with self.exit_lock:
                 self.exit_requested = True
             return 
-
-# 切换为语音输入
-    # def speech_input_thread(self):
-    #     while True:
-    #         with self.exit_lock:
-    #             if self.exit_requested:
-    #                 return
-            
-    #         user_input = self.speech_input.get_speech()
 
 
     def update_frame(self):
