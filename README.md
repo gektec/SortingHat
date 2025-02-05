@@ -1,6 +1,11 @@
 # SortingHat
 
 ## Usage
+
+download release
+
+**OR**
+
 需求python版本：3.9-3.12
 
 1. `pip install -r requirements.txt`
