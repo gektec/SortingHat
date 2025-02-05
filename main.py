@@ -3,7 +3,10 @@ import threading
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout
 from PyQt6.QtCore import QTimer, pyqtSignal, QObject
 from src.audio_processing.speech_input import SpeechInput
+
+# from src.audio_processing.deepseek_api import OpenAIAPI
 from src.audio_processing.openai_api import OpenAIAPI
+
 from src.audio_processing.tts_synthesis import TTSSynthesis
 from src.video_processing import VideoProcessing
 from src.threading_utils import ThreadManager
@@ -12,7 +15,7 @@ from src.pyqt_utils import PyQtDisplay, InputBox, LogDisplay
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Hogwarts Sorting Hat")
+        self.setWindowTitle("Sorting Hat")
         self.setGeometry(100, 100, 1280, 720)
 
         self.central_widget = QWidget()
@@ -46,7 +49,7 @@ class MainWindow(QMainWindow):
         #todo 每个tts指令均应创建线程
         threading.Thread(target=self.tts_synthesis.synthesize_speech, args=(self.initial_prompt,)).start()
         
-        self.thread_manager.start_thread(self.speech_input_thread)
+        # self.thread_manager.start_thread(self.speech_input_thread)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
@@ -92,23 +95,22 @@ class MainWindow(QMainWindow):
                 self.exit_requested = True
             return 
 
-    def speech_input_thread(self):
-        while True:
-            with self.exit_lock:
-                if self.exit_requested:
-                    return
-
-            # 切换为语音输入
-            # user_input = self.speech_input.get_speech()
+# 切换为语音输入
+    # def speech_input_thread(self):
+    #     while True:
+    #         with self.exit_lock:
+    #             if self.exit_requested:
+    #                 return
             
-            # 等待来自InputBox的用户输入信号
-            QTimer.singleShot(0, lambda: None)
+    #         user_input = self.speech_input.get_speech()
+
 
     def update_frame(self):
         frame = self.video_processing.get_frame()
         self.pyqt_display.update_display(frame)
 
     def closeEvent(self, event):
+        self.timer.stop()  # Stop the timer
         self.thread_manager.stop_all_threads()
         self.video_processing.release()
         event.accept()
