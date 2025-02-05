@@ -170,5 +170,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-src/audio_processing/outdated/
+src/text_processing/outdated/
 profile.svg
