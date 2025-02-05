@@ -9,9 +9,6 @@ from src.video_processing import VideoProcessing
 from src.threading_utils import ThreadManager
 from src.pyqt_utils import PyQtDisplay, InputBox, LogDisplay
 
-class Communicate(QObject):
-    user_input_signal = pyqtSignal(str)
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -42,9 +39,6 @@ class MainWindow(QMainWindow):
         self.video_processing = VideoProcessing()
         self.thread_manager = ThreadManager()
         
-        self.comm = Communicate()
-        self.comm.user_input_signal.connect(self.process_user_input)
-        
         self.thread_manager.start_thread(self.video_processing.process_video)
 
         self.initial_prompt = "Welcome to Hogwarts. Let me piken in thine soule..."
@@ -55,7 +49,7 @@ class MainWindow(QMainWindow):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)  # 每30ms更新一次
+        self.timer.start(30)
 
         self.input_box.input.returnPressed.connect(self.handle_input_box)
         self.input_box.button.clicked.connect(self.handle_input_box)
@@ -63,13 +57,17 @@ class MainWindow(QMainWindow):
     def handle_input_box(self):
         user_input = self.input_box.input.text()
         self.input_box.input.clear()
-        self.comm.user_input_signal.emit(user_input)
-        self.log_display.append(f"User: {user_input}")
+        self.log_display.append(f"You: {user_input}")
+        
+        # 启动一个新线程以避免阻塞
+        threading.Thread(target=self.process_user_input, args=(user_input,)).start()
 
     def process_user_input(self, user_input):
         response = self.openai_api.process_text(user_input)
         
-        self.tts_synthesis.synthesize_speech(response.hat_response)  # 使用TTS进行回复
+        self.log_display.append(f"Sorting Hat: {response.hat_response}")
+        #* 阻塞调用:使用TTS进行回复
+        self.tts_synthesis.synthesize_speech(response.hat_response)
         
         self.cumulative_scores["Gryffindor"] += response.gryffindor
         self.cumulative_scores["Hufflepuff"] += response.hufflepuff
