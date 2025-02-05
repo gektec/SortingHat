@@ -171,3 +171,4 @@ cython_debug/
 .pypirc
 
 src/audio_processing/outdated/
+profile.svg

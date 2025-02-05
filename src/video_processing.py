@@ -47,7 +47,7 @@ class VideoProcessing:
                     inverse_alpha = 1.0 - alpha_channel
 
                     for c in range(0, 3):
-                        image[y1:y2, x1:x2, c] = (image[y1:y2, x1:x2, c] * inverse_alpha + 
+                        image[y1:y2, x1:x2, c] = (image[y1:y2, x1:x2, c] * inverse_alpha +
                                                   hat_part[:, :, c] * alpha_channel)
 
             self.frame = image
