@@ -1,7 +1,8 @@
-pygame
+pyqt6
 speechrecognition
 openai
 pyttsx3
 mediapipe
+msvc-runtime
 opencv-python
 numpy
