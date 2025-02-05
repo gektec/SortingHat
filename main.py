@@ -2,7 +2,7 @@ import sys
 import threading
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout
 from PyQt6.QtCore import QTimer, QMetaObject, Qt, Q_ARG
-from text_processing.outdated.speech_input import SpeechInput
+#from text_processing.outdated.speech_input import SpeechInput
 
 # from src.audio_processing.deepseek_api import OpenAIAPI
 from src.text_processing.openai_api import OpenAIAPI
@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.exit_lock = threading.Lock()
         self.cumulative_scores = {"Gryffindor": 0, "Hufflepuff": 0, "Ravenclaw": 0, "Slytherin": 0}
 
-        self.speech_input = SpeechInput()
+        #self.speech_input = SpeechInput()
         self.openai_api = OpenAIAPI()
         self.tts_synthesis = TTSSynthesis()
         self.video_processing = VideoProcessing()
@@ -46,6 +46,7 @@ class MainWindow(QMainWindow):
 
         self.initial_prompt = "Welcome to Hogwarts. Let me piken in thine soule..."
         print(self.initial_prompt)
+        self.log_display.append(f"Sorting Hat: {self.initial_prompt}")
         #todo 每个tts指令均应创建线程
         threading.Thread(target=self.tts_synthesis.synthesize_speech, args=(self.initial_prompt,)).start()
         
@@ -87,6 +88,7 @@ class MainWindow(QMainWindow):
             winner = max(self.cumulative_scores, key=self.cumulative_scores.get)
             
             exit_prompt = f"In accordance wyth thyne soul, thou shouldst be allotted to {winner}."
+            self.log_display.append(f"Sorting Hat: {exit_prompt}")
             self.tts_synthesis.synthesize_speech(exit_prompt)
             print(exit_prompt)
 
@@ -96,8 +98,12 @@ class MainWindow(QMainWindow):
 
 
     def update_frame(self):
+        if self.exit_requested:
+            QApplication.quit()
+            return
         frame = self.video_processing.get_frame()
         self.pyqt_display.update_display(frame)
+
 
     def closeEvent(self, event):
         self.timer.stop()  # Stop the timer
